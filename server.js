@@ -14,8 +14,10 @@
 
 import express from 'express';
 import sanitizeHtml from 'sanitize-html';
+import cors from 'cors';
 
 const app = express();
+app.use(cors()); // Allow all origins — required for browser requests
 app.use(express.json({ limit: '200kb' }));
 
 // ── Helpers ────────────────────────────────────────────────

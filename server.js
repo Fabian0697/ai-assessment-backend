@@ -130,6 +130,32 @@ function manualReviewFallback() {
   };
 }
 
+// ── /api/generateFeedback — Handlungsfeld reinforcement ──────
+app.post('/api/generateFeedback', async (req, res) => {
+  const { prompt } = req.body;
+  if (!prompt) return res.status(400).json({ error: 'Missing prompt' });
+  try {
+    const apiRes = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': process.env.ANTHROPIC_API_KEY,
+        'anthropic-version': '2023-06-01'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 1500,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    const data = await apiRes.json();
+    const text = data.content?.find(c => c.type === 'text')?.text || '{}';
+    res.json({ text });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Scoring API listening on port ${PORT}`));
 
